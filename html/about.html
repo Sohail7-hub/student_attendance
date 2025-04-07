@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Student Attendance System</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #1a2f4b, #2c5282);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            box-shadow: 0 4px 15px #d4cbcb;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            font-size: 1.8rem;
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .content-section {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 3rem;
+            margin-top: 2rem;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .content-section:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 2rem;
+            text-align: center;
+            padding-top: 2rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #1a237e;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, rgb(88 229 127), rgb(221 217 95));
+        }
+
+        h4 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .row>div {
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .row>div:hover {
+            transform: translateY(-10px);
+        }
+
+        @media (max-width: 768px) {
+            .content-section {
+                padding: 2rem;
+                margin-top: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="../index.php"><i class="bi bi-mortarboard-fill"></i> Student Attendance</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.php"><i class="bi bi-house-fill"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html"><i class="bi bi-info-circle-fill"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../contact.php"><i class="bi bi-envelope-fill"></i> Contact Us</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../login.php"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../signup.php"><i class="bi bi-person-plus-fill"></i> Sign Up</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>About Us</h1>
+        <div class="content-section">
+            <h2 class="mb-4"><i class="bi bi-bullseye me-2"></i>Our Mission</h2>
+            <p>The Student Attendance System is dedicated to providing an efficient and user-friendly platform for
+                educational institutions to manage their student information, attendance records, and academic progress.
+                Our system streamlines administrative tasks and enhances communication between students, teachers, and
+                administrators.</p>
+
+            <h2 class="mb-4 mt-5"><i class="bi bi-gift-fill me-2"></i>What We Offer</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-mortarboard-fill fa-4x mb-3" style="color: #4CAF50; font-size: 2.5rem;"></i>
+                    <h4>Student Attendance</h4>
+                    <p>Comprehensive student profile management, including personal information, academic records, and
+                        attendance tracking.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-person-workspace fa-4x mb-3" style="color: #2196F3; font-size: 2.5rem;"></i>
+                    <h4>Teacher Portal</h4>
+                    <p>Dedicated interface for teachers to manage classes, record attendance, and monitor student
+                        progress.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-gear-fill fa-4x mb-3" style="color: #FF9800; font-size: 2.5rem;"></i>
+                    <h4>Administrative Tools</h4>
+                    <p>Powerful administrative features for managing users, generating reports, and maintaining system
+                        security.</p>
+                </div>
+            </div>
+
+            <h2 class="mb-4 mt-5"><i class="bi bi-arrow-up-circle-fill me-2"></i>Currently Improving</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-phone-fill fa-4x mb-3" style="color: #9C27B0; font-size: 2.5rem;"></i>
+                    <h4>Mobile Responsiveness</h4>
+                    <p>Enhancing the user experience across all devices with improved mobile-friendly interfaces and
+                        responsive design.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-graph-up-arrow fa-4x mb-3" style="color: #E91E63; font-size: 2.5rem;"></i>
+                    <h4>Advanced Analytics</h4>
+                    <p>Developing comprehensive reporting tools and analytics dashboards for better insights into
+                        student performance.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <i class="bi bi-laptop-fill fa-4x mb-3" style="color: #3F51B5; font-size: 2.5rem;"></i>
+                    <h4>Modern Learning Tools</h4>
+                    <p>Integrating cutting-edge educational technologies and learning management features to support
+                        modern teaching methods.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-4" style="background-color: rgba(255, 255, 255, 0.1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5 class="mb-3" style="color: #ffffff; font-weight: 600;">Student Attendance</h5>
+                    <p class="mb-0" style="color: #ffffff;">Empowering education through efficient attendance tracking
+                        solutions.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5 class="mb-3" style="color: #f1f1f1; font-weight: 600;">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="../index.php" class="text-decoration-none" style="color: #ffffff;">Home</a></li>
+                        <li><a href="about.html" class="text-decoration-none" style="color: #ffffff;">About</a></li>
+                        <li><a href="../contact.php" class="text-decoration-none" style="color: #ffffff;">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5 class="mb-3" style="color: #ffffff; font-weight: 600;">Connect With Us</h5>
+                    <div class="social-icons">
+                        <a href="#" class="me-3" style="color: rgb(255, 255, 255);"><i
+                                class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="me-3" style="color: rgb(255, 255, 255);"><i
+                                class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="me-3" style="color: rgb(255, 255, 255);"><i
+                                class="fab fa-linkedin-in fa-lg"></i></a>
+                        <a href="#" style="color: rgb(255, 255, 255);"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: rgba(0, 0, 0, 0.1);">
+            <div class="text-center" style="color: #555;">
+                <p class="mb-0" style="color: white;">&copy; 2025 Student Attendance System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
