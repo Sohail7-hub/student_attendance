@@ -92,11 +92,11 @@ $class_years_result = mysqli_query($conn, $class_years_query);
     <div class="container-fluid mt-4">
         <div class="row mb-3">
             <div class="col-md-12">
-                <h2><i class="fas fa-clipboard-list"></i> Attendance Management</h2>
+                <h2><i class="fas fa-clipboard-list"></i> Attendance Records</h2>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="admin_dashboard.php">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Attendance Management</li>
+                        <li class="breadcrumb-item active">Attendance Records</li>
                     </ol>
                 </nav>
             </div>
@@ -189,14 +189,12 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                     <table class="table table-striped table-hover attendance-table">
                         <thead>
                             <tr>
-                                <th>Student ID</th>
                                 <th>Student Name</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Recorded By</th>
-                                <th>Type</th>
+                                <th>Student ID</th>
+                                <th>Class</th>
                                 <th>Attendance %</th>
                                 <th>Absents</th>
+                                <th>Date Range</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -391,22 +389,21 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                         let tableHtml = '';
                         response.students.forEach(function(record) {
                             let statusClass = '';
-                            if (record.status.toLowerCase() === 'present') {
-                                statusClass = 'status-present';
-                            } else if (record.status.toLowerCase() === 'absent') {
-                                statusClass = 'status-absent';
-                            } else if (record.status.toLowerCase() === 'leave') {
-                                statusClass = 'status-leave';
+                            if (record.status) {
+                                if (record.status.toLowerCase() === 'present') {
+                                    statusClass = 'status-present';
+                                } else if (record.status.toLowerCase() === 'absent') {
+                                    statusClass = 'status-absent';
+                                } else if (record.status.toLowerCase() === 'leave') {
+                                    statusClass = 'status-leave';
+                                }
                             }
 
                             tableHtml += `
                                 <tr>
-                                    <td>${record.student_id}</td>
                                     <td>${record.student_name}</td>
-                                    <td>${record.date}</td>
-                                    <td class="${statusClass}">${record.status}</td>
-                                    <td>${record.recorded_by}</td>
-                                    <td>${record.type}</td>
+                                    <td>${record.student_id}</td>
+                                    <td>${record.class_type} - ${record.class_year}</td>
                                     <td>
                                         <span class="badge ${record.attendance_percentage >= 75 ? 'bg-success' : record.attendance_percentage >= 50 ? 'bg-warning' : 'bg-danger'} p-2">
                                             ${record.attendance_percentage}%
@@ -415,6 +412,7 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                                     <td>
                                         <span class="badge bg-danger p-2">${record.absent_count}</span>
                                     </td>
+                                    <td>${startDate} - ${endDate}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-info view-details" 
                                             data-student-id="${record.student_id}" 

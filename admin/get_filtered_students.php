@@ -22,21 +22,20 @@ if (!$class_type || !$class_year) {
 }
 
 // Base query - Improved to ensure proper joining and filtering
-$sql = "SELECT
+$sql = "SELECT 
         s.name as student_name,
         s.student_id,
+        s.class_type,
+        s.class_year,
         COALESCE(a.date, aa.date) as date,
         COALESCE(a.status, aa.status) as status,
-        CASE 
-            WHEN a.id IS NOT NULL THEN t.name
-            WHEN aa.id IS NOT NULL THEN u.username
-            ELSE NULL
-        END as recorded_by,
-        CASE 
-            WHEN a.id IS NOT NULL THEN 'Teacher'
-            WHEN aa.id IS NOT NULL THEN 'Admin'
-            ELSE NULL
-        END as type
+        COALESCE(t.name, u.username) as recorded_by,
+        CASE WHEN a.date IS NOT NULL THEN 'Teacher' ELSE 'Admin' END as record_type,
+        COUNT(DISTINCT COALESCE(a.date, aa.date)) as total_days,
+        SUM(CASE WHEN COALESCE(a.status, aa.status) = 'present' THEN 1 ELSE 0 END) as present_days,
+        SUM(CASE WHEN COALESCE(a.status, aa.status) = 'absent' THEN 1 ELSE 0 END) as absent_days,
+        SUM(CASE WHEN COALESCE(a.status, aa.status) = 'leave' THEN 1 ELSE 0 END) as leave_days,
+        ROUND((SUM(CASE WHEN COALESCE(a.status, aa.status) = 'present' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(DISTINCT COALESCE(a.date, aa.date)), 0)), 1) as attendance_percentage
         FROM students s
         LEFT JOIN attendance a ON s.student_id = a.student_id
         LEFT JOIN attendance_admin aa ON s.student_id = aa.student_id
@@ -106,7 +105,11 @@ if (!empty($conditions)) {
     $sql .= " WHERE " . implode(' AND ', $conditions);
 }
 
-$sql .= " ORDER BY COALESCE(a.date, aa.date) DESC, s.name ASC";
+// Only group by student_id and name when no specific student is selected
+if (!$student_id) {
+    $sql .= " GROUP BY s.student_id, s.name";
+}
+$sql .= " ORDER BY s.name ASC, COALESCE(a.date, aa.date) DESC";
 
 // Debug information
 if (isset($_POST['debug'])) {
@@ -156,70 +159,31 @@ try {
     $records = [];
     $student_stats = [];
 
-    // First pass: collect all records and calculate statistics per student
+    // Process records
+    $records = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Check if we have valid data before adding to records
-        if (!empty($row['student_name']) && !empty($row['date']) && !empty($row['status'])) {
+        if (!empty($row['student_name'])) {
             $records[] = [
                 'student_id' => $row['student_id'],
                 'student_name' => $row['student_name'],
+                'class_type' => $row['class_type'],
+                'class_year' => $row['class_year'],
                 'date' => $row['date'],
                 'status' => $row['status'],
-                'recorded_by' => $row['recorded_by'] ?: 'Unknown',
-                'type' => $row['type'] ?: 'Unknown'
+                'recorded_by' => $row['recorded_by'],
+                'record_type' => $row['record_type'],
+                'attendance_percentage' => $row['attendance_percentage'],
+                'absent_count' => $row['absent_days'],
+                'total_days' => $row['total_days'],
+                'present_days' => $row['present_days'],
+                'leave_days' => $row['leave_days']
             ];
-
-            // Track statistics per student
-            $student_id = $row['student_id'];
-            if (!isset($student_stats[$student_id])) {
-                $student_stats[$student_id] = [
-                    'student_id' => $student_id,
-                    'student_name' => $row['student_name'],
-                    'total_days' => 0,
-                    'present_days' => 0,
-                    'absent_days' => 0,
-                    'leave_days' => 0
-                ];
-            }
-
-            $student_stats[$student_id]['total_days']++;
-
-            $status = strtolower($row['status']);
-            if ($status === 'present') {
-                $student_stats[$student_id]['present_days']++;
-            } elseif ($status === 'absent') {
-                $student_stats[$student_id]['absent_days']++;
-            } elseif ($status === 'leave') {
-                $student_stats[$student_id]['leave_days']++;
-            }
         }
     }
 
     // Set response headers
     header('Content-Type: application/json');
     header('Cache-Control: no-cache, must-revalidate');
-
-    // Calculate attendance percentage for each student and add to records
-    foreach ($records as &$record) {
-        $student_id = $record['student_id'];
-        if (isset($student_stats[$student_id])) {
-            $stats = $student_stats[$student_id];
-            $total_days = $stats['total_days'];
-            $present_days = $stats['present_days'];
-            $absent_days = $stats['absent_days'];
-
-            // Calculate attendance percentage
-            $attendance_percentage = ($total_days > 0) ? round(($present_days / $total_days) * 100, 1) : 0;
-
-            // Add statistics to record
-            $record['attendance_percentage'] = $attendance_percentage;
-            $record['absent_count'] = $absent_days;
-        } else {
-            $record['attendance_percentage'] = 0;
-            $record['absent_count'] = 0;
-        }
-    }
-    unset($record); // Break the reference
 
     if (empty($records)) {
         echo json_encode([
