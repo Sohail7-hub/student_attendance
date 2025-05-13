@@ -60,11 +60,35 @@ $class_year = $teacher_info['class_year'];
         h1,
         h3,
         h4 {
-            color: #000;
+            color: #2563eb;
             font-weight: 600;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        .section {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #22c55e;
+        }
+
+        .bulk-attendance-section {
+            background-color: #f0f9ff;
+        }
+
+        .record-attendance-section {
+            background-color: #f0fdf4;
+        }
+
+        .attendance-management-section {
+            background-color: #faf5ff;
+        }
+
+        .vacation-calendar-section {
+            background-color: #fff7ed;
         }
 
         label {
@@ -200,143 +224,221 @@ $class_year = $teacher_info['class_year'];
         <a href="..\logout.php" class="btn btn-danger float-end">Logout</a>
         <div class="row mt-4">
             <div class="col-md-12">
-                <h3>Record Attendance</h3>
-                <form method="POST" action="record_attendance.php" class="mb-4">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="student_id">Student ID</label>
-                                <input type="text" class="form-control" id="student_id" name="student_id" required>
-                                <div id="student_info" class="mt-2"></div>
+                <div class="section bulk-attendance-section">
+                    <h3>Students in <?php echo $class_type . ' ' . $class_year; ?> Year</h3>
+                    <div class="table-responsive">
+                        <form action="record_attendance.php" method="post" id="bulkAttendanceForm">
+                            <input type="hidden" name="bulk_attendance" value="1">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="bulk_date" class="form-label">Select Date for Bulk Attendance:</label>
+                                    <input type="date" class="form-control" id="bulk_date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="date">Date</label>
-                                <input type="date" class="form-control" id="date" name="date" required value="<?php echo date('Y-m-d'); ?>">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="status">Status</label>
-                                <select class="form-control" id="status" name="status" required>
-                                    <option value="Present">Present</option>
-                                    <option value="Absent">Absent</option>
-                                    <option value="Leave">Leave</option>
-                                    <option value="Holiday">Holiday</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="submit" class="btn btn-primary d-block w-100">Record Attendance</button>
-                            </div>
-                        </div>
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Attendance Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $stmt = mysqli_prepare($conn, "SELECT s.student_id, s.name, s.email FROM students s WHERE s.class_type = ? AND s.class_year = ? ORDER BY s.name");
+                                    mysqli_stmt_bind_param($stmt, "ss", $class_type, $class_year);
+                                    mysqli_stmt_execute($stmt);
+                                    $students_result = mysqli_stmt_get_result($stmt);
+                                    while ($student = mysqli_fetch_assoc($students_result)) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($student['student_id']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($student['name']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($student['email']) . "</td>";
+                                        echo "<td>";
+                                        echo "<select name='status[" . htmlspecialchars($student['student_id']) . "]' class='form-control'>";
+                                        echo "<option value='Present'>Present</option>";
+                                        echo "<option value='Absent'>Absent</option>";
+                                        echo "<option value='Leave'>Leave</option>";
+                                        echo "<option value='Holiday'>Holiday</option>";
+                                        echo "</select>";
+                                        echo "</td>";
+                                        echo "</tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-primary mt-3">Submit Bulk Attendance</button>
+                        </form>
                     </div>
-                </form>
-
-                <h3>Attendance Management</h3>
-                <div class="mb-4">
-                    <h4>View Attendance Report</h4>
-                    <form id="viewAttendanceForm" class="row g-3">
-                        <div class="col-md-6">
-                            <label for="report_student_id" class="form-label">Student ID</label>
-                            <input type="text" class="form-control" id="report_student_id" name="student_id" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="month" class="form-label">Month</label>
-                            <input type="month" class="form-control" id="month" name="month" required>
-                        </div>
-                        <div class="col-12">
-                            <button type="button" class="btn btn-primary d-block w-100" onclick="viewReport()">View Report</button>
-                        </div>
-                    </form>
-                    <div id="attendanceReport" class="mt-4">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Recorded By</th>
-                                </tr>
-                            </thead>
-                            <tbody id="attendanceData">
-                            </tbody>
-                        </table>
-                    </div>
-                    <script>
-                        function viewReport() {
-                            const studentId = document.getElementById('report_student_id').value;
-                            const month = document.getElementById('month').value;
-                            if (studentId && month) {
-                                window.open(`get_attendance_report.php?student_id=${studentId}&month=${month}`, '_blank');
-                            } else {
-                                alert('Please fill in both Student ID and Month fields');
-                            }
-                        }
-                    </script>
                 </div>
 
-                <h4>Recent Attendance Records</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Student Name</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $stmt = mysqli_prepare($conn, "SELECT a.*, s.name as student_name FROM attendance a 
-                            JOIN students s ON a.student_id = s.student_id 
-                            WHERE a.teacher_id = ? AND s.class_type = ? AND s.class_year = ? 
-                            AND TIMESTAMPDIFF(HOUR, a.date, NOW()) <= 24 
-                            ORDER BY a.date DESC, TIMESTAMPDIFF(HOUR, a.date, NOW()) ASC");
-                        mysqli_stmt_bind_param($stmt, "sss", $teacher_id, $class_type, $class_year);
-                        mysqli_stmt_execute($stmt);
-                        $result = mysqli_stmt_get_result($stmt);
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['student_id']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['student_name']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['date']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['status']) . "</td>";
-                            echo "</tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                <div class="section record-attendance-section">
+                    <h3>Record Attendance</h3>
+                    <form method="POST" action="record_attendance.php" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="student_id">Student ID</label>
+                                    <input type="text" class="form-control" id="student_id" name="student_id" required>
+                                    <div id="student_info" class="mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="date">Date</label>
+                                    <input type="date" class="form-control" id="date" name="date" required value="<?php echo date('Y-m-d'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="status">Status</label>
+                                    <select class="form-control" id="status" name="status" required>
+                                        <option value="Present">Present</option>
+                                        <option value="Absent">Absent</option>
+                                        <option value="Leave">Leave</option>
+                                        <option value="Holiday">Holiday</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">Record Attendance</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <h3>Attendance Management</h3>
+                    <div class="mb-4">
+                        <h4>View Attendance Report</h4>
+                        <form id="viewAttendanceForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label for="report_student_id" class="form-label">Student ID</label>
+                                <input type="text" class="form-control" id="report_student_id" name="student_id" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="month" class="form-label">Month</label>
+                                <input type="month" class="form-control" id="month" name="month" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary d-block w-100" onclick="viewReport()">View Report</button>
+                            </div>
+                        </form>
+                        <div id="attendanceReport" class="mt-4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Recorded By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceData">
+                                </tbody>
+                            </table>
+                        </div>
+                        <script>
+                            function viewReport() {
+                                const studentId = document.getElementById('report_student_id').value;
+                                const month = document.getElementById('month').value;
+                                if (studentId && month) {
+                                    window.open(`get_attendance_report.php?student_id=${studentId}&month=${month}`, '_blank');
+                                } else {
+                                    alert('Please fill in both Student ID and Month fields');
+                                }
+                            }
+                        </script>
+                    </div>
+
+                    <h4>Recent Attendance Records</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Student Name</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <style>
+                            .status-present {
+                                background-color: #e8f5e9;
+                            }
+                            .status-absent {
+                                background-color: #ffebee;
+                            }
+                            .status-leave {
+                                background-color: #fff9c4;
+                            }
+                            .status-holiday {
+                                background-color: #e3f2fd;
+                            }
+                            select option[value='Present'] {
+                                background-color: #e8f5e9;
+                            }
+                            select option[value='Absent'] {
+                                background-color: #ffebee;
+                            }
+                            select option[value='Leave'] {
+                                background-color: #fff9c4;
+                            }
+                            select option[value='Holiday'] {
+                                background-color: #e3f2fd;
+                            }
+                            </style>
+                            <?php
+                            $stmt = mysqli_prepare($conn, "SELECT a.*, s.name as student_name FROM attendance a 
+                                JOIN students s ON a.student_id = s.student_id 
+                                WHERE a.teacher_id = ? AND s.class_type = ? AND s.class_year = ? 
+                                AND TIMESTAMPDIFF(HOUR, a.date, NOW()) <= 24 
+                                ORDER BY a.date DESC, TIMESTAMPDIFF(HOUR, a.date, NOW()) ASC");
+                            mysqli_stmt_bind_param($stmt, "sss", $teacher_id, $class_type, $class_year);
+                            mysqli_stmt_execute($stmt);
+                            $result = mysqli_stmt_get_result($stmt);
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $status_class = 'status-' . strtolower($row['status']);
+                                echo "<tr class='" . $status_class . "'>";
+                                echo "<td>" . htmlspecialchars($row['student_id']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['student_name']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['date']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['status']) . "</td>";
+                                echo "</tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
 
 
-                <h3>Vacation Calendar</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $stmt = mysqli_prepare($conn, "SELECT * FROM vacations ORDER BY start_date");
-                        mysqli_stmt_execute($stmt);
-                        $result = mysqli_stmt_get_result($stmt);
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            echo "<tr>";
-                            echo "<td>" . htmlspecialchars($row['title']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['description']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['start_date']) . "</td>";
-                            echo "<td>" . htmlspecialchars($row['end_date']) . "</td>";
-                            echo "</tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                    <h3>Vacation Calendar</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $stmt = mysqli_prepare($conn, "SELECT * FROM vacations ORDER BY start_date");
+                            mysqli_stmt_execute($stmt);
+                            $result = mysqli_stmt_get_result($stmt);
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                echo "<tr>";
+                                echo "<td>" . htmlspecialchars($row['title']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['description']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['start_date']) . "</td>";
+                                echo "<td>" . htmlspecialchars($row['end_date']) . "</td>";
+                                echo "</tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -366,52 +468,7 @@ $class_year = $teacher_info['class_year'];
             }
         });
     </script>
-    <h3 class="mt-4">Students in <?php echo $class_type . ' ' . $class_year; ?> Year</h3>
-    <div class="table-responsive">
-        <form action="record_attendance.php" method="post" id="bulkAttendanceForm">
-            <input type="hidden" name="bulk_attendance" value="1">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="bulk_date" class="form-label">Select Date for Bulk Attendance:</label>
-                    <input type="date" class="form-control" id="bulk_date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
-                </div>
-            </div>
-            <table class="table table-striped table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Student ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Attendance Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $stmt = mysqli_prepare($conn, "SELECT s.student_id, s.name, s.email FROM students s WHERE s.class_type = ? AND s.class_year = ? ORDER BY s.name");
-                    mysqli_stmt_bind_param($stmt, "ss", $class_type, $class_year);
-                    mysqli_stmt_execute($stmt);
-                    $students_result = mysqli_stmt_get_result($stmt);
-                    while ($student = mysqli_fetch_assoc($students_result)) {
-                        echo "<tr>";
-                        echo "<td>" . htmlspecialchars($student['student_id']) . "</td>";
-                        echo "<td>" . htmlspecialchars($student['name']) . "</td>";
-                        echo "<td>" . htmlspecialchars($student['email']) . "</td>";
-                        echo "<td>";
-                        echo "<select name='status[" . htmlspecialchars($student['student_id']) . "]' class='form-control'>";
-                        echo "<option value='Present'>Present</option>";
-                        echo "<option value='Absent'>Absent</option>";
-                        echo "<option value='Leave'>Leave</option>";
-                        echo "<option value='Holiday'>Holiday</option>";
-                        echo "</select>";
-                        echo "</td>";
-                        echo "</tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-            <button type="submit" class="btn btn-primary mt-3">Submit Bulk Attendance</button>
-        </form>
-    </div>
+
 </body>
 
 </html>

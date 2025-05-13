@@ -200,55 +200,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
         <?php } ?>
 
         <div class="row mt-4">
-            <!-- Add Student Form -->
-            <div class="col-md-6">
-                <h3 class="text-center">Add Student</h3>
-                <div class="card">
-                    <div class="card-body">
-                        <form action="add_student.php" method="POST" id="studentForm">
-                            <div class="mb-3">
-                                <input type="text" class="form-control" name="student_id" placeholder="Student ID" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" class="form-control" name="name" placeholder="Name" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="number" class="form-control" name="age" placeholder="Age" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="email" class="form-control" name="email" placeholder="Email" required>
-                            </div>
-                            <div class="mb-3">
-                                <select class="form-control" name="class_type" required>
-                                    <option value="">Select Class Type</option>
-                                    <option value="CIT">CIT</option>
-                                    <option value="ELC">ELC</option>
-                                    <option value="CIVIL">CIVIL</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <select class="form-control" name="class_year" required>
-                                    <option value="">Select Year</option>
-                                    <option value="1st">1st Year</option>
-                                    <option value="2nd">2nd Year</option>
-                                    <option value="3rd">3rd Year</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" class="form-control" name="username" placeholder="Username" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" class="form-control" name="password" id="studentPassword" placeholder="Password" required>
-                                <small class="form-text text-muted">Password must be at least 6 characters long.</small>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Add Student</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- Add Teacher Form -->
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h3 class="text-center">Add Teacher</h3>
                 <div class="card">
                     <div class="card-body">

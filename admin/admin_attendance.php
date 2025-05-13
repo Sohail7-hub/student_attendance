@@ -222,27 +222,35 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                     </div>
                     <div class="attendance-summary mb-3">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card bg-success text-white">
                                     <div class="card-body text-center">
-                                        <h5>Present</h5>
+                                        <h5>Overall Present</h5>
                                         <h3 id="presentCount">0</h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card bg-danger text-white">
                                     <div class="card-body text-center">
-                                        <h5>Absent</h5>
+                                        <h5>Overall Absent</h5>
                                         <h3 id="absentCount">0</h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card bg-warning text-white">
                                     <div class="card-body text-center">
-                                        <h5>Leave</h5>
+                                        <h5>Overall Leave</h5>
                                         <h3 id="leaveCount">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Total Days</h5>
+                                        <h3 id="totalDays">0</h3>
                                     </div>
                                 </div>
                             </div>
@@ -255,13 +263,31 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                                     <th>Date</th>
                                     <th>Status</th>
                                     <th>Recorded By</th>
-                                    <th>Type</th>
                                 </tr>
                             </thead>
-                            <tbody id="modalAttendanceDetails">
+                            <tbody id="recordAttendanceDetails">
                                 <!-- Student attendance details will be loaded here -->
                             </tbody>
                         </table>
+                        <div id="paginationControls" class="d-flex justify-content-between align-items-center mt-3" style="display: none !important;">
+                            <div class="text-muted">
+                                <span id="paginationInfo"></span>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item">
+                                        <button class="page-link" id="prevPage" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <button class="page-link" id="nextPage" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -274,13 +300,214 @@ $class_years_result = mysqli_query($conn, $class_years_query);
     <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- Record Check Modal -->
+    <div class="modal fade" id="studentRecordModal" tabindex="-1" aria-labelledby="studentRecordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentRecordModalLabel">Student Attendance Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Student Name:</strong> <span id="recordStudentName"></span></p>
+                            <p><strong>Student ID:</strong> <span id="recordStudentId"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Present</h5>
+                                            <p class="card-text" id="totalPresent">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="card bg-danger text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Absent</h5>
+                                            <p class="card-text" id="totalAbsent">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Leave</h5>
+                                            <p class="card-text" id="totalLeave">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="recordStartDate" class="form-label">Start Date:</label>
+                            <input type="date" class="form-control" id="recordStartDate">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="recordEndDate" class="form-label">End Date:</label>
+                            <input type="date" class="form-control" id="recordEndDate">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" onclick="viewReport(window.currentStudentId, $('#recordStartDate').val(), $('#recordEndDate').val())">
+                                Filter Records
+                            </button>
+                        </div>
+                    </div>
+                    <div id="attendanceDetails" class="table-responsive">
+                        <!-- Attendance records will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
+        let currentPage = 1;
+
+        function viewReport(studentId, customStartDate = null, customEndDate = null, page = 1) {
+            currentPage = page;
+            // Get current month and year if custom dates are not provided
+            let startDate, endDate;
+            if (customStartDate && customEndDate) {
+                startDate = customStartDate;
+                endDate = customEndDate;
+            } else {
+                const today = new Date();
+                const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                const year = today.getFullYear();
+                startDate = `${year}-${month}-01`;
+                endDate = `${year}-${month}-${new Date(year, month, 0).getDate()}`;
+            }
+
+            // Set the date range in the modal
+            $('#recordStartDate').val(startDate);
+            $('#recordEndDate').val(endDate);
+
+            // Store the current student ID for later use
+            window.currentStudentId = studentId;
+
+            // Show loading state
+            $('#attendanceDetails').html('<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Remove existing total days information
+            $('.modal-body .row.mb-3:first .col-md-12').remove();
+
+            // Fetch student details and attendance records
+            $.ajax({
+                url: 'get_student_info.php',
+                type: 'POST',
+                data: {
+                    student_id: studentId,
+                    start_date: startDate,
+                    end_date: endDate,
+                    page: page
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        return;
+                    }
+
+                    // Update modal with student information
+                    $('#recordStudentName').text($(`#attendanceTableBody tr[data-student-id="${studentId}"] td:first-child`).text());
+                    $('#recordStudentId').text(studentId);
+
+                    // Update attendance summary
+                    $('#totalPresent').text(`${response.summary.present || 0} (${response.summary.attendance_rate}%)`);
+                    $('#totalAbsent').text(response.summary.absent || 0);
+                    $('#totalLeave').text(response.summary.leave || 0);
+                    
+                    // Add total days information
+                    $('.modal-body .row.mb-3:first').append(`
+                        <div class="col-md-12 mt-3">
+                            <p class="text-info"><strong>Total Days:</strong> ${response.summary.total_days}</p>
+                        </div>
+                    `);
+
+                    // Generate attendance details table
+                    let detailsHtml = '<table class="table table-striped"><thead><tr><th>Date</th><th>Status</th><th>Recorded By</th><th>Type</th></tr></thead><tbody>';
+
+                    if (response.records && response.records.length > 0) {
+                        response.records.forEach(function(record) {
+                            let statusClass = '';
+                            if (record.status.toLowerCase() === 'present') statusClass = 'text-success';
+                            else if (record.status.toLowerCase() === 'absent') statusClass = 'text-danger';
+                            else if (record.status.toLowerCase() === 'leave') statusClass = 'text-warning';
+
+                            detailsHtml += `
+                                <tr>
+                                    <td>${record.date}</td>
+                                    <td class="${statusClass}">${record.status}</td>
+                                    <td>${record.recorded_by}</td>
+                                    <td>${record.type}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        detailsHtml += '<tr><td colspan="4" class="text-center">No records found</td></tr>';
+                    }
+
+                    detailsHtml += '</tbody></table>';
+
+                    // Add pagination if available
+                    if (response.pagination) {
+                        detailsHtml += '<div class="d-flex justify-content-between align-items-center mt-3">';
+                        detailsHtml += `<div>Page ${response.pagination.current_page} of ${response.pagination.total_pages}</div>`;
+                        detailsHtml += '<div class="btn-group">';
+                        if (response.pagination.current_page > 1) {
+                            detailsHtml += `<button type="button" class="btn btn-outline-primary" onclick="viewReport('${studentId}', '${startDate}', '${endDate}', ${response.pagination.current_page - 1})">Previous</button>`;
+                        }
+                        if (response.pagination.current_page < response.pagination.total_pages) {
+                            detailsHtml += `<button type="button" class="btn btn-outline-primary" onclick="viewReport('${studentId}', '${startDate}', '${endDate}', ${response.pagination.current_page + 1})">Next</button>`;
+                        }
+                        detailsHtml += '</div></div>';
+                    }
+
+                    // Update the modal content
+                    $('#attendanceDetails').html(detailsHtml);
+
+                    // Show the modal
+                    $('#studentRecordModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    alert('Error fetching student records: ' + error);
+                }
+            });
+        }
+        
+
         $(document).ready(function() {
             // Initialize date pickers
             $(".date-picker").flatpickr({
                 dateFormat: "Y-m-d",
                 allowInput: true
             });
+
+            // Function to update records based on date range
+            window.updateRecordDateRange = function() {
+                const startDate = $('#recordStartDate').val();
+                const endDate = $('#recordEndDate').val();
+                
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates');
+                    return;
+                }
+                
+                if (window.currentStudentId) {
+                    viewReport(window.currentStudentId, startDate, endDate);
+                }
+            };
 
             // Handle class type and year selection changes
             $("#classTypeSelect, #classYearSelect").change(function() {
@@ -311,6 +538,17 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                 $("#noRecords").show();
             });
 
+            // Handle pagination buttons
+            $('#prevPage').click(function() {
+                if (currentPage > 1) {
+                    viewReport(window.currentStudentId, $('#recordStartDate').val(), $('#recordEndDate').val(), currentPage - 1);
+                }
+            });
+
+            $('#nextPage').click(function() {
+                viewReport(window.currentStudentId, $('#recordStartDate').val(), $('#recordEndDate').val(), currentPage + 1);
+            });
+
             // Function to load students based on class type and year
             function loadStudents(classType, classYear) {
                 $.ajax({
@@ -335,6 +573,71 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                     error: function(xhr, status, error) {
                         console.error("Error loading students:", error);
                         alert("Failed to load students. Please try again.");
+                    }
+                });
+            }
+
+            // Function to view student details
+            function viewStudentDetails(studentId, studentName) {
+                const startDate = $("#startDate").val();
+                const endDate = $("#endDate").val();
+
+                // Update modal title and student info
+                $("#modalStudentName").text(studentName);
+                $("#modalStudentId").text(studentId);
+
+                // Show loading state in modal
+                $("#modalAttendanceDetails").html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+                $("#presentCount").text('...');
+                $("#absentCount").text('...');
+                $("#leaveCount").text('...');
+
+                // Show the modal
+                $("#studentDetailsModal").modal('show');
+
+                // Fetch student attendance details
+                $.ajax({
+                    url: "get_student_info.php",
+                    type: "POST",
+                    data: {
+                        student_id: studentId,
+                        start_date: startDate,
+                        end_date: endDate
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.error) {
+                            $("#modalAttendanceDetails").html(`<tr><td colspan="4" class="text-center text-danger">${response.error}</td></tr>`);
+                            return;
+                        }
+
+                        // Update attendance counts
+                        $("#presentCount").text(response.summary.present || 0);
+                        $("#absentCount").text(response.summary.absent || 0);
+                        $("#leaveCount").text(response.summary.leave || 0);
+
+                        // Generate attendance details table
+                        let detailsHtml = '';
+                        response.records.forEach(function(record) {
+                            let statusClass = '';
+                            if (record.status.toLowerCase() === 'present') statusClass = 'status-present';
+                            else if (record.status.toLowerCase() === 'absent') statusClass = 'status-absent';
+                            else if (record.status.toLowerCase() === 'leave') statusClass = 'status-leave';
+
+                            detailsHtml += `
+                                <tr>
+                                    <td>${record.date}</td>
+                                    <td class="${statusClass}">${record.status}</td>
+                                    <td>${record.recorded_by}</td>
+                                    <td>${record.type || 'Regular'}</td>
+                                </tr>`;
+                        });
+
+                        $("#modalAttendanceDetails").html(detailsHtml || '<tr><td colspan="4" class="text-center">No attendance records found</td></tr>');
+                    },
+                    error: function(xhr, status, error) {
+                        $("#modalAttendanceDetails").html('<tr><td colspan="4" class="text-center text-danger">Failed to load attendance details</td></tr>');
+                        console.error("Error loading student details:", error);
                     }
                 });
             }
@@ -398,7 +701,7 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                                     statusClass = 'status-leave';
                                 }
                             }
-
+                            
                             tableHtml += `
                                 <tr>
                                     <td>${record.student_name}</td>
@@ -414,11 +717,7 @@ $class_years_result = mysqli_query($conn, $class_years_query);
                                     </td>
                                     <td>${startDate} - ${endDate}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-info view-details" 
-                                            data-student-id="${record.student_id}" 
-                                            data-student-name="${record.student_name}">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
+                                        <button type="button" class="btn btn-info btn-sm me-2" onclick="viewReport('${record.student_id}')">Record Check</button>
                                     </td>
                                 </tr>
                             `;
